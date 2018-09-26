@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.MedicalCardDao">
+
+	<!-- 绑定微信用户个人信息 -->
+	<insert id="insertWeachat" parameterType="com.example.demo.domain.MedicalCard.GetHospitalMedicalCardList.UserModel" >
+		insert into oa_wechat(
+			openId,
+			identityCard,
+			userPhone,
+			userName,
+			certType,
+			createUser,
+			createTime
+		)values(
+			#{userModel.openId},
+			#{userModel.openIDCard},
+			#{userModel.openTel},
+			#{userModel.openUserName},
+			0,
+			#{userModel.openId},
+			#{userModel.createTime}
+		)
+		
+	</insert>
+
+	<!-- 获取个人用户信息 -->
+	<select id="getUserData" parameterType="String" resultType="com.example.demo.domain.MedicalCard.GetHospitalMedicalCardList.UserModel" >
+	  	select identityCard openIDCard,userPhone openTel,userName openUserName,certType certType from oa_wechat
+	  	where openId = #{id}
+	  	
+	</select>
+
+	<!-- 新增患者信息 -->
+	<insert id="insertPatient" parameterType="com.example.demo.domain.MedicalCard.RegistMedicalCard.RegistMedicalCardHead" >
+		insert into oa_patient(
+			hospitalUserID,
+			patientID,
+			cardNo,
+			CardType,
+			identityCard,
+			HomeAddress,
+			patientPhone,
+			patientName,
+			createTime,
+			createUser,
+			fromHostp
+		)values(
+			#{record.hospitalUserID},
+			#{record.patientID},
+			#{record.cardNo},
+			#{record.cardType},
+			#{record.idCard},
+			#{record.homeAddress},
+			#{record.tel},
+			#{record.patientName},
+			#{record.time},
+			#{record.openID},
+			#{record.extInfo}
+		)
+		
+	</insert>
+	
+	<!-- 新增绑定关系 -->
+	<insert id="insertBding" parameterType="com.example.demo.domain.MedicalCard.RegistMedicalCard.RegistMedicalCardHead" >
+		insert into oa_binding_info(
+			openID,
+			type,
+			patientID,
+			createTime
+			
+		)values(
+			#{record.openID},
+			#{record.cardProperty},
+			#{record.patientID},
+			#{record.time}
+		)
+		
+	</insert>
+	
+	<!-- 获取已绑定的就诊人识别码 -->
+	<select id="getPatientID" parameterType="String" resultType="String" >
+		select patientID from oa_binding_info
+		where openID = #{openID}
+	</select>
+	
+	<!-- 获得就诊人详情 -->
+	<select id="getPatientData" parameterType="String"  resultType="com.example.demo.domain.MedicalCard.GetHospitalMedicalCardList.UserModel" >
+		select a.hospitalUserID openId,a.patientID patientID,a.identityCard openIDCard,a.patientPhone openTel,a.patientName openUserName,a.cardNo createTime,a.fromHostp idCard,b.type tel 
+		from oa_patient a,oa_binding_info b
+		where 1= 1
+		and a.patientID = #{id}
+		and b.patientID = #{id}
+		<if test='hospt != null and hospt != ""'> 
+		and fromHostp = #{hospt}
+		</if>	
+		
+	</select>
+	
+	<!-- 新增收藏医生功能 -->
+	<insert id="addDocList" parameterType="com.example.demo.domain.InModel" >
+		insert into oa_collection(
+			docID,
+			openID,
+			createTime
+		)values(
+			#{inModel.docID},
+			#{inModel.openID},
+			#{inModel.createTime}
+		)
+	</insert>
+	
+	<!-- 删除收藏医生 -->
+	<delete id="deleteDocList" parameterType="com.example.demo.domain.InModel" >
+		delete from oa_collection 
+		where 1=1 
+			and docID = #{inModel.docID}
+			and openID = #{inModel.openID}
+	</delete>
+	
+	<!-- 获取收藏医生编码 -->
+	<select id="getDocList" parameterType="String" resultType="String" >
+		select docID from oa_collection
+		where openID = #{openId}
+	</select>
+	
+	<!-- 获取收藏医生数据 -->
+	<select id="getDocData" parameterType="String" resultType="com.example.demo.domain.Booking.DocModel">
+		select hospitalName,docCode,docName,docPhotoPath,deptName2,docDuty,docDesc,jsonMemo from oa_book_resource
+		where docCode = #{doc}
+	</select>
+	
+	<!-- 查看是否收藏医生 -->
+	<select id="checkDoc" parameterType="com.example.demo.domain.InModel" resultType="String">
+		select docID from oa_collection
+		where 1=1
+			and docID = #{doc.docID}
+			and openID = #{doc.openID}
+	</select>
+	
+	<!-- 获得医院唯一识别码 -->
+	<select id="getHostpId" parameterType="String" resultType="String">
+		select hospitalUserID from oa_patient where patientID = #{patientID}
+	</select>
+	
+	<!-- 删除就诊人个人信息 -->
+	<delete id="deletePatient">
+		delete from oa_patient where patientID = #{patientID}
+		
+	</delete>
+	
+	<!-- 删除绑定关系 -->
+	<delete id="deleteBing">
+		delete from oa_binding_info where patientID = #{patientID}
+		
+	</delete>
+	
+	<!-- 删除就诊人预约记录 -->
+	<delete id="deleteBook">
+		delete from oa_book_patient where patientID = #{patientID}
+		
+	</delete>
+	
+	<!-- 判断用户是否拥有个人信息 -->
+	<select id="checkWeachat" parameterType="String" resultType="Integer" >
+		select count(*) from oa_wechat where openId = #{openId}
+	</select>
+	
+	
+	<!-- 编辑用户个人信息 -->
+	<update id="updateWeachat" parameterType="com.example.demo.domain.MedicalCard.GetHospitalMedicalCardList.UserModel" >
+		update  oa_wechat set
+			identityCard = #{userModel.openIDCard},
+			userPhone = #{userModel.openTel},
+			userName = #{userModel.openUserName},
+			updateTime = #{userModel.createTime},
+			updateUser = #{userModel.openId}
+		where openId = #{userModel.openId}
+	</update>
+	
+	<!-- 确认是否已绑定 -->
+	<select id="checkIsExist" parameterType="String" resultType="Integer" >
+		select count(1) from oa_patient
+		where cardNo = #{cardNo}
+		and fromHostp = #{hospt}
+		and patientName = #{name}
+	</select>
+	
+	<!-- 查询轮播图内容 -->
+	<select id="selectPhotoText" parameterType="com.example.demo.domain.Photo" resultType="com.example.demo.domain.Photo">
+		select id,photo,title,text,createTime from 
+			oa_photo
+		where 1=1
+			and status =1
+			and top = 1
+			and type = #{photo.type}
+		<if test='photo.id != null and photo.id != ""'>
+			and id = #{photo.id}
+		</if>
+		order by createTime desc
+	</select>
+	
+</mapper>

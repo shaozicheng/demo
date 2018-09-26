@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.BookingDao">
+
+    <!-- 获取数据库中已有的医生列表数据 -->
+	<select id="getOldDoc" resultType="String" >
+		select docCode from oa_book_resource where hospitalName = #{hostp}
+	</select>
+
+	<!-- 新增医生数据 -->
+	<insert id="addNewDoc" parameterType="com.example.demo.domain.Booking.DocModel" >
+		insert into oa_book_resource(
+			 hospitalID,
+			 hospitalName,
+			 hospitalDesc,
+			 deptCode1,
+			 deptName1,
+			 deptDesc1,
+			 jsonMemo1,
+			 deptPhotoPath1,
+			 deptCode2,
+			 deptName2,
+			 deptDesc2,
+			 jsonMemo2,
+			 deptPhotoPath2,
+			 docCode,
+			 docName,
+			 docPhotoPath,
+			 docDuty,
+			 docDesc,
+			 jsonMemo,
+			 status
+			 
+		)values(
+			
+			 #{doc.hospitalID},
+			 #{doc.hospitalName},
+			 #{doc.hospitalDesc},
+			 #{doc.deptCode1},
+			 #{doc.deptName1},
+			 #{doc.deptDesc1},
+			 #{doc.jsonMemo1},
+			 #{doc.deptPhotoPath1},
+			 #{doc.deptCode2},
+			 #{doc.deptName2},
+			 #{doc.deptDesc2},
+			 #{doc.jsonMemo2},
+			 #{doc.deptPhotoPath2},
+			 #{doc.docCode},
+			 #{doc.docName},
+			 #{doc.docPhotoPath},
+			 #{doc.docDuty},
+			 #{doc.docDesc},
+			 #{doc.jsonMemo},
+			 0
+			
+		)
+	</insert>
+	
+	<!-- 更新医生数据 -->
+	<update id="updateDoc" parameterType="com.example.demo.domain.Booking.DocModel" >
+		update  oa_book_resource set
+			hospitalID = #{doc.hospitalID},
+			hospitalName = #{doc.hospitalName},
+			hospitalDesc = #{doc.hospitalDesc},
+			deptCode1 = #{doc.deptCode1},
+			deptName1 = #{doc.deptName1},
+			deptDesc1 = #{doc.deptDesc1},
+			jsonMemo1 = #{doc.jsonMemo1},
+			deptPhotoPath1 = #{doc.deptPhotoPath1},
+			deptCode2 = #{doc.deptCode2},
+			deptName2 = #{doc.deptName2},
+		    deptDesc2 = #{doc.deptDesc2},
+			jsonMemo2 = #{doc.jsonMemo2},
+			deptPhotoPath2 = #{doc.deptPhotoPath2},
+			docName = #{doc.docName},
+			docPhotoPath = #{doc.docPhotoPath},
+			docDuty = #{doc.docDuty},
+			docDesc = #{doc.docDesc},
+			jsonMemo = #{doc.jsonMemo}
+		where docCode = #{doc.docCode}
+	</update>
+	
+	<!-- 逻辑删除过气医生 -->
+	<update id="changeStatus" parameterType="String" >
+		update oa_book_resource set
+			status = 1 
+		where docCode = #{doc}
+	</update>
+	
+	<!-- 删除过时的科室预约信息 -->
+	<delete id="deleteDept" parameterType="String" >
+		delete from oa_book_dept
+		where deptCode = #{deptCode}
+	</delete>
+
+	<!-- 新增新的科室预约信息 -->
+	<insert id="addDept" parameterType="com.example.demo.domain.Booking.BookingDeptNoSource.DeptResourceDocNoSourceList" >
+		insert into oa_book_dept (
+			deptCode,
+			docCode,
+			day,
+			resourceMemo,
+			isAvailable,
+			memo
+		)values(
+			#{dept.deptCode},
+			#{dept.docCode},
+			#{dept.day},
+			#{dept.resourceMemo},
+			#{dept.isAvailable},
+			#{dept.memo}
+		)
+	</insert>
+	
+	<!-- 获得所需日期的科室预约情况 -->
+	<select id="getDept" parameterType="String" resultType="com.example.demo.domain.Booking.BookingDeptNoSource.DeptResourceDocNoSourceList" >
+		select b.docName deptCode,b.docDesc docMemo,b.docDuty docDuty,b.docPhotoPath docPhotoPath,a.docCode docCode,a.day day,a.resourceMemo resourceMemo,a.isAvailable isAvailable,a.memo memo from
+			oa_book_dept a,oa_book_resource b
+			where a.docCode=b.docCode 
+				and a.day = #{day}
+				and a.deptCode = #{deptCode}
+	</select>
+	
+	<!-- 删除过期的医生预约信息 -->
+	<delete id="deleteDoc" parameterType="String" >
+		delete from oa_book_doc
+		where docID = #{docCode}
+	</delete>
+	
+	<!-- 新增新的医生预约信息 -->
+	<insert id="addDoc" parameterType="com.example.demo.domain.Booking.BookingDocResource.DocResourceResourceList" >
+		insert into oa_book_doc (
+			docID,
+			resourceID,
+			day,
+			timeStart,
+			timeEnd,
+			registLevel1,
+			amount,
+			resourceMemo,
+			isAvailable,
+			isDay,
+			memo
+		)values(
+			#{doc.docCode},
+			#{doc.resourceID},
+			#{doc.day},
+			#{doc.timeStart},
+			#{doc.timeEnd},
+			#{doc.registLevel1},
+			#{doc.amount},
+			#{doc.resourceMemo},
+			#{doc.isAvailable},
+			#{doc.isDay},
+			#{doc.memo}
+		)
+	</insert>
+	
+	<!-- 获得所需日期的医生预约情况 -->
+	<select id="getDoc" parameterType="String" resultType="com.example.demo.domain.Booking.BookingDocResource.DocResourceResourceList" >
+		select 
+		b.docName docCode,b.docDesc docMemo,b.docDuty docDuty,b.docPhotoPath docPhotoPath,a.resourceID resourceID,a.day day,a.timeStart timeStart,a.timeEnd timeEnd,a.registLevel1 registLevel1,
+		a.amount amount,a.resourceMemo resourceMemo,a.isAvailable isAvailable,a.isDay isDay,a.memo memo
+		
+		from
+			oa_book_doc a,oa_book_resource b
+			where a.docID=b.docCode 
+				and a.day = #{day}
+				and a.docID = #{docCode}
+			order by a.timeEnd
+	</select>
+	
+	<!-- 保存预约相关信息 -->
+	<insert id="confirmBooking" parameterType="com.example.demo.domain.Booking.ConfirmBooking.BookPatientModel" >
+		insert into oa_book_patient(
+			hospt,
+			dept,
+			doc,
+			cost,
+			time,
+			patientID,
+			bookingID,
+			needPay,
+			resourceID,
+			createTime,
+			openID,
+			bookingStatus
+		)values(
+		
+			#{patient.hospt},
+			#{patient.dept},
+			#{patient.doc},
+			#{patient.cost},
+			#{patient.time},
+			#{patient.patientID},
+			#{patient.bookingID},
+			#{patient.needPay},
+			#{patient.resourceID},
+			#{patient.createTime},
+			#{patient.id},
+			#{patient.bookingStatus}
+		)
+		
+	</insert>
+	
+	<!-- 获取患者预约记录 -->
+	<select id="getPatientData" parameterType="String" resultType="com.example.demo.domain.Booking.ConfirmBooking.BookPatientModel">
+		select * 
+			from oa_book_patient
+		
+			where id = #{patientID}
+	</select>
+	
+	<!-- 更新预约状态 -->
+	<update id="updatePatient" parameterType="String" >
+		update oa_book_patient set
+			bookingStatus = #{status},
+			updateTime = #{updateTime}
+		where bookingID = #{bookingID}
+	
+	</update>
+	
+	<!-- 获取科室 -->
+	<select id="getDeptList" parameterType="com.example.demo.domain.Booking.DocModel" resultType="com.example.demo.domain.Booking.DocModel">
+		select deptCode1,deptName1,deptCode2,deptName2 from oa_book_resource 
+		where 1=1 
+			and hospitalID = #{model.hospitalID}
+		<if test='model.deptCode1 != null and model.deptCode1 != ""'>
+			and  deptCode1 = #{model.deptCode1}
+		</if>
+		<if test='model.deptName2 != null and model.deptName2 != ""'>
+			and  deptName2 LIKE "%"#{model.deptName2}"%" 
+		</if>
+		GROUP BY deptCode1,deptCode2
+	</select>
+	
+	<!-- 获取用户预约列表 -->
+	<select id="getPatientList" parameterType="com.example.demo.domain.MedicalCard.GetHospitalMedicalCardList.UserModel" resultType="com.example.demo.domain.MedicalCard.GetHospitalMedicalCardList.UserModel">
+		select a.id paid,a.hospt openId,a.dept openTel ,a.patientID patientID,a.time createTime,b.patientName openUserName,a.bookingID openIDCard,a.bookingStatus id ,b.identityCard idCard,b.patientPhone tel  from
+		(select hospt,bookingID,openID,dept,patientID,time,bookingStatus,createTime,id from oa_book_patient) a,oa_patient b
+		where 1=1 
+		and a.patientID = b.patientID
+		and a.openID = #{model.openId}
+		<if test='model.patientID != null and model.patientID != ""'>
+			and  a.patientID = #{model.patientID}
+		</if>
+		order by a.createTime desc
+	</select>
+	
+	
+</mapper>
