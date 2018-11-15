@@ -26,6 +26,8 @@ import com.google.gson.Gson;
 @Component
 public class MedicalCardService {
 	
+	final static String localhost = "https://www.tonticn.cn:8081/";
+	
 	@Autowired
 	MedicalCardDao medicalCardDao;
 	
@@ -64,11 +66,9 @@ public class MedicalCardService {
 	 */
 	@Transactional
 	public void getRecordCard(RegistMedicalCardHead recordCardHead) {
-		String patientID=UUID.randomUUID().toString().replace("-", "");
 		SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date=new Date();
 		String createTime=sdf.format(date);
-		recordCardHead.setPatientID(patientID);
 		recordCardHead.setTime(createTime);
 		medicalCardDao.insertPatient(recordCardHead);//新增患者信息
 		medicalCardDao.insertBding(recordCardHead);//更新绑定关系
@@ -256,41 +256,20 @@ public class MedicalCardService {
 	}
 	
 	/**
-	 * 查询生效的健康宣教内容
-	 * 
-	 * @return
-	 */
-	public List<Photo> selectdeucationText(Photo photo) {
-		return medicalCardDao.selectdeucationText(photo);
-	}
-	
-	/**
-	 * 查询生效的新闻内容
-	 * 
-	 * @return
-	 */
-	public List<Photo> selectnewText(Photo photo) {
-		return medicalCardDao.selectnewText(photo);
-	}
-	
-	/**
-	 * 查询生效的轮播图内容
+	 * 查询生效的图内容
 	 * 
 	 * @return
 	 */
 	public List<Photo> selectPhotoText(Photo photo) {
-		return medicalCardDao.selectPhotoText(photo);
+		
+		List<Photo> pootos = medicalCardDao.selectPhotoText(photo);
+		for (Photo photo2 : pootos) {
+			photo2.setPhoto(localhost+photo2.getPhoto());
+			photo2.setCreateTime(photo2.getCreateTime().substring(0, 11));
+		}
+		return pootos;
 	}
 	
-	/**
-	 * 查询生效的公告内容
-	 * 
-	 * @return
-	 */
-	public List<Photo> selectNoticeText(Photo photo) {
-		return medicalCardDao.selectNoticeText(photo);
-	}
-
 	/**
 	 * 获得医院唯一识别码
 	 * @param patientID
@@ -298,6 +277,37 @@ public class MedicalCardService {
 	 */
 	public String getHostpId(String patientID) {
 		return medicalCardDao.getHostpId(patientID);
+	}
+
+	/**
+	 * 获取院内简介图
+	 * 
+	 * @return
+	 */
+	public List<String> selectIntroduce() {
+		List<String> introduce = new ArrayList<String>();
+		introduce.add(localhost+"introduce1.png");
+		introduce.add(localhost+"introduce2.png");
+		introduce.add(localhost+"introduce3.png");
+		introduce.add(localhost+"introduce4.png");
+		introduce.add(localhost+"introduce5.png");
+		return introduce;
+	}
+
+	/**
+	 * 查询生效的各类图标题
+	 * 
+	 * @return
+	 */
+	public List<Photo> selectPhotoTitle(Photo photo) {
+		Integer start = 0;
+		if(photo.getStatus() !=null){
+			start = (photo.getId()-1)*photo.getStatus();
+		}else{
+			photo.setStatus(3);
+		}
+		photo.setId(start);
+		 return  medicalCardDao.selectPhotoTitle(photo);
 	}
 	
 }

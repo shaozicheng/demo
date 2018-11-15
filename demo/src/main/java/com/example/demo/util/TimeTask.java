@@ -35,10 +35,10 @@ public class TimeTask {
 		recordCardHead.setAccessToken("800EBED9-63E5-4408-A184-BE693DA32CB6");//市区分部
 		recordCardHead.setOpenUserID("2088022943884345");
 		
-		getResource(recordCardHead,"市区分部");
+		getResource(recordCardHead,"01");
 		
 		recordCardHead.setAccessToken("800EBED9-63E5-4408-A184-BE693DA32CB7");//金山总部
-		getResource(recordCardHead,"金山总部");
+		getResource(recordCardHead,"02");
 	}
 	
 	public void getResource(BookingResourceHead recordCardHead,String hostp){

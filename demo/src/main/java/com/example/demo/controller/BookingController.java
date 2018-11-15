@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.AES.anno.Decrypt;
+import com.example.demo.AES.anno.Encrypt;
 import com.example.demo.domain.Entity;
 import com.example.demo.domain.Booking.DocModel;
 import com.example.demo.domain.Booking.BookingDeptNoSource.BookingDeptNoSourceHead;
@@ -68,8 +70,6 @@ public class BookingController {
 //	@PostMapping
 	public Entity getBookingResource(@RequestBody BookingResourceHead recordCardHead ){
 		Entity entity=new Entity();
-//		BookingModel bookingModes = new BookingModel();
-//		BookingService bookingS = new BookingService();
 		String xml=bookingMode.sendStr(recordCardHead);
 		
 		try {
@@ -86,14 +86,13 @@ public class BookingController {
             
             entity.setSuccess(true);
     		entity.setResult(xmlTest.getBody());
-//    		bookingService.GetBookingResource(xmlTest.getBody());
+    		bookingService.GetBookingResource(xmlTest.getBody(),"虹口院区");
     		
 		} catch (Exception e) {
 			entity.setSuccess(false);
 			entity.setMessage(e.getMessage());
 			e.printStackTrace();
 		}
-		
 		
 		return entity;
 	}
@@ -105,6 +104,8 @@ public class BookingController {
 	 */
 	@RequestMapping("/getbookingdeptnosource")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getBookingDeptNoSource(@RequestBody BookingDeptNoSourceHead recordCardHead ){
 		Entity entity=new Entity();
 		String xml=bookingMode.sendStr(recordCardHead);
@@ -130,9 +131,8 @@ public class BookingController {
     			entity.setSuccess(false);
     			entity.setMessage("暂无数据");
     		}
-    		
-    		
-    		
+//			entity.setSuccess(true);
+//			entity.setResult("成功");
 		} catch (Exception e) {
 			entity.setSuccess(false);
 			entity.setMessage(e.getMessage());
@@ -150,6 +150,8 @@ public class BookingController {
 	 */
 	@RequestMapping("/getbookingdocresource")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getBookingDocResource(@RequestBody BookingDocResourceHead recordCardHead ){
 		Entity entity=new Entity();
 		String xml=bookingMode.sendStr(recordCardHead);
@@ -191,12 +193,16 @@ public class BookingController {
 	 */
 	@RequestMapping("/confirmbooking")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity ConfirmBooking(@RequestBody  BookPatientModel bookPatientModel){
 		Entity entity=new Entity();
 		ConfirmBookingHead recordCardHead =new ConfirmBookingHead();
 		
 		recordCardHead.setAccessToken(bookPatientModel.getAccessToken());
+		
 		recordCardHead.setOpenUserID(bookPatientModel.getOpenUserID());
+		
 		recordCardHead.setHospitalUserID(bookPatientModel.getHospitalUserID());
 		recordCardHead.setResourceID(bookPatientModel.getResourceID());
 		String xml=bookingMode.sendStr(recordCardHead);
@@ -248,6 +254,8 @@ public class BookingController {
 	 */
 	@RequestMapping("/cancelbooking")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity CancelBooking(@RequestBody CancelBookingHead recordCardHead ){
 		Entity entity=new Entity();
 		String xml=bookingMode.sendStr(recordCardHead);
@@ -264,21 +272,26 @@ public class BookingController {
             CancelBookingXml xmlTest= (CancelBookingXml) xstream.fromXML(result);
             entity.setResult(xmlTest);
             
-            //更新预约状态
-            GetPatientBookingDetailHead record = new GetPatientBookingDetailHead();
-            record.setAccessToken(recordCardHead.getAccessToken());
-            record.setBookingID(recordCardHead.getBookingID());
-            record.setOpenUserID(recordCardHead.getOpenUserID());
-            String status=null;
-            status = GetPatientBookingDetail(record);
-            bookingService.updatePatient(status,record.getBookingID());
-            
-            entity.setSuccess(true);
-    		entity.setMessage("取消成功");
+            if(xmlTest.getBody().getResponseResult().getIsSuccess() .equals("1")){
+            	 //更新预约状态
+                GetPatientBookingDetailHead record = new GetPatientBookingDetailHead();
+                record.setAccessToken(recordCardHead.getAccessToken());
+                record.setBookingID(recordCardHead.getBookingID());
+                record.setOpenUserID(recordCardHead.getOpenUserID());
+                String status=null;
+                status = GetPatientBookingDetail(record);
+                bookingService.updatePatient(status,record.getBookingID());
+                
+                entity.setSuccess(true);
+        		entity.setMessage("取消成功");
+            }else{
+            	entity.setSuccess(false);
+    			entity.setMessage("取消失败");
+            }
     		
 		} catch (Exception e) {
 			entity.setSuccess(false);
-			entity.setMessage(e.getMessage());
+			entity.setMessage("取消失败");
 			e.printStackTrace();
 		}
 		
@@ -293,6 +306,8 @@ public class BookingController {
 	 */
 	@RequestMapping("/getpatientlist")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getPatientList(@RequestBody UserModel userModel ){
 		Entity entity=new Entity();
 		try {
@@ -314,6 +329,8 @@ public class BookingController {
 	 */
 	@RequestMapping("/getpatientdata")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getPatientData(@RequestBody GetPatientBookingDetailHead recordCardHead){
 		Entity entity=new Entity();
 		String status=null;
@@ -340,6 +357,8 @@ public class BookingController {
 	 */
 	@RequestMapping("/getpatientbookinglist")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity GetPatientBookingList(@RequestBody GetPatientBookingListHead recordCardHead ){
 		Entity entity=new Entity();
 		String xml=bookingMode.sendStr(recordCardHead);
@@ -379,6 +398,8 @@ public class BookingController {
 	 */
 	@RequestMapping("/getpatientbookingdetail")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public String GetPatientBookingDetail(@RequestBody GetPatientBookingDetailHead recordCardHead ){
 		Entity entity=new Entity();
 		String status=null;
@@ -408,7 +429,6 @@ public class BookingController {
 			e.printStackTrace();
 		}
 		
-		
 		return status;
 	}
 	
@@ -418,11 +438,20 @@ public class BookingController {
 	 */
 	@RequestMapping("/getdept")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getDept(@RequestBody DocModel model){
 		Entity entity=new Entity();
-		if(model.getHospitalID() != null){
-			List<DocModel> dept=bookingService.getDept(model);
-			entity.setResult(dept);
+		try {
+			if(model.getHospitalID() != null){
+				List<DocModel> dept=bookingService.getDept(model);
+				entity.setResult(dept);
+				entity.setSuccess(true);
+			}
+			
+		} catch (Exception e) {
+			entity.setSuccess(false);
+			entity.setMessage("获取失败");
 		}
 		
 		return entity;

@@ -30,5 +30,56 @@ public class ReportInspectionItemList {
     @XStreamAsAttribute
     @XStreamAlias("ReportAlert")
 	private String reportAlert;
+    
+    //报告编号
+	private String reportNo;
+
+	public String getReportNo() {
+		return reportNo;
+	}
+
+	public void setReportNo(String reportNo) {
+		this.reportNo = reportNo;
+	}
+
+	public String getItemName() {
+		return itemName;
+	}
+
+	public void setItemName(String itemName) {
+		this.itemName = itemName;
+	}
+
+	public String getItemResult() {
+		return itemResult;
+	}
+
+	public void setItemResult(String itemResult) {
+		this.itemResult = itemResult;
+	}
+
+	public String getReferenceValue() {
+		return referenceValue;
+	}
+
+	public void setReferenceValue(String referenceValue) {
+		this.referenceValue = referenceValue;
+	}
+
+	public String getReferenceValueUnit() {
+		return referenceValueUnit;
+	}
+
+	public void setReferenceValueUnit(String referenceValueUnit) {
+		this.referenceValueUnit = referenceValueUnit;
+	}
+
+	public String getReportAlert() {
+		return reportAlert;
+	}
+
+	public void setReportAlert(String reportAlert) {
+		this.reportAlert = reportAlert;
+	}
 	
 }

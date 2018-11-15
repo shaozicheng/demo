@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +9,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.AES.anno.Decrypt;
+import com.example.demo.AES.anno.Encrypt;
 import com.example.demo.domain.Entity;
-import com.example.demo.domain.Photo;
 import com.example.demo.domain.Booking.DocModel;
 import com.example.demo.domain.Booking.CancelBooking.CancelBookingHead;
 import com.example.demo.domain.MedicalCard.GetHospitalMedicalCardList.UserModel;
@@ -43,16 +41,23 @@ public class CommonController {
 	 */
 	@RequestMapping("/getweachat")
 	@PostMapping
-	public Entity getWeachat(@RequestBody DocModel model){
+	@Encrypt
+	@Decrypt
+	public Entity  getWeachat(@RequestBody DocModel model){
 		Entity entity=new Entity();
-		if(model.getHospitalID() != null){
-			UserModel userModel =new UserModel();
-			userModel.setOpenId(model.getHospitalID());
-			userModel.setOpenUserName(model.getHospitalName());
-			commonService.addTourist(userModel);//添加游客记录
-			entity.setSuccess(true);
+		try {
+			if(model.getHospitalID() != null){
+				UserModel userModel =new UserModel();
+				userModel.setOpenId(model.getHospitalID());
+				userModel.setOpenUserName(model.getHospitalName());
+				commonService.addTourist(userModel);//添加游客记录
+				entity.setSuccess(true);
+				entity.setResult("213123");
+			}
+		} catch (Exception e) {
+			entity.setSuccess(false);
+			entity.setMessage("游客记录失败");
 		}
-		
 		
 		return entity;
 		
@@ -65,26 +70,34 @@ public class CommonController {
 	 */
 	@RequestMapping("/checkdata")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity checkData(@RequestBody DocModel model ){
 		Entity entity=new Entity();
-		if(model.getHospitalID() != null){
-			
-			Integer user = commonService.checkWeachat(model.getHospitalID());//验证用户信息是否完善
-			Integer patients = commonService.checkPatient(model.getHospitalID());//验证是否绑定过就诊卡
-			
-			if(user ==1 && patients >0){
-				entity.setResult(1);//验证通过 
-			}else if(user != 1 && patients >0){
-				entity.setMessage("用户个人信息未完善,请至个人中心完善");
-				entity.setResult(2);
-			}else if(user ==1 && patients ==0){
-				entity.setMessage("未绑定就诊卡,请至个人中心绑定");
-				entity.setResult(3);
-			}else{
-				entity.setMessage("未绑定就诊卡与用户个人信息,请至个人中心进行填写");
-				entity.setResult(4);
+		try {
+			if(model.getHospitalID() != null){
+				
+				Integer user = commonService.checkWeachat(model.getHospitalID());//验证用户信息是否完善
+				Integer patients = commonService.checkPatient(model.getHospitalID());//验证是否绑定过就诊卡
+				
+				if(user ==1 && patients >0){
+					entity.setResult(1);//验证通过 
+				}else if(user != 1 && patients >0){
+					entity.setMessage("用户个人信息未完善,请至个人中心完善");
+					entity.setResult(2);
+				}else if(user ==1 && patients ==0){
+					entity.setMessage("未绑定就诊卡,请至个人中心绑定");
+					entity.setResult(3);
+				}else{
+					entity.setMessage("未绑定就诊卡与用户个人信息,请至个人中心进行填写");
+					entity.setResult(4);
+				}
 			}
+		} catch (Exception e) {
+			entity.setMessage("系统错误");
+			entity.setSuccess(false);
 		}
+		
 		return entity;
 		
 	}
@@ -97,6 +110,8 @@ public class CommonController {
 	 */
 	@RequestMapping("/getquestionnaire")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getQuestionnaire(@RequestBody CancelBookingHead model){
 		Entity entity=new Entity();
 		try {
@@ -106,7 +121,6 @@ public class CommonController {
 		} catch (Exception e) {
 			entity.setSuccess(false);
 		}
-		
 		
 		return entity;
 		

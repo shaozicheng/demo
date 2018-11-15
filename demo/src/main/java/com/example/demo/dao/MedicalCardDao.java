@@ -137,19 +137,7 @@ public interface MedicalCardDao {
 	 */
 	int checkIsExist(@Param(value = "cardNo") String cardNo, @Param(value = "hospt")  String hospt, @Param(value = "name")  String name);
 	
-	/**
-	 * 查询生效的健康宣教内容
-	 * 
-	 * @return
-	 */
-	List<Photo> selectdeucationText(@Param(value = "photo") Photo photo);
 
-	/**
-	 * 查询生效的新闻内容
-	 * 
-	 * @return
-	 */
-	List<Photo> selectnewText(@Param(value = "photo") Photo photo);
 
 	/**
 	 * 获得医院唯一识别码
@@ -159,17 +147,17 @@ public interface MedicalCardDao {
 	String getHostpId(@Param(value = "patientID") String patientID);
 	
 	/**
-	 * 查询生效的轮播图内容
+	 * 查询生效的图内容
 	 * 
 	 * @return
 	 */
 	List<Photo> selectPhotoText(@Param(value = "photo") Photo photo);
 	
 	/**
-	 * 查询生效的公告内容
+	 * 查询生效的各类图标题
 	 * 
 	 * @return
 	 */
-	List<Photo> selectNoticeText(@Param(value = "photo") Photo photo);
+	List<Photo> selectPhotoTitle(@Param(value = "photo") Photo photo);
 	
 }

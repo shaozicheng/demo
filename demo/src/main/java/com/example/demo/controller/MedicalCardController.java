@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.AES.anno.Decrypt;
+import com.example.demo.AES.anno.Encrypt;
 import com.example.demo.domain.Entity;
 import com.example.demo.domain.InModel;
 import com.example.demo.domain.Photo;
@@ -46,7 +49,6 @@ public class MedicalCardController {
 	
 	final static Logger logger = LoggerFactory.getLogger(BookingController.class);
 	
-	final static String localhost = "http://192.168.2.165:8081/";
 	
 	@Autowired
 	MedicalCardService MedicalCardService;
@@ -61,14 +63,18 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/getRecordCard")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getRecordCard(@RequestBody RegistMedicalCardHead recordCardHead ){
 		Entity entity=new Entity();
+		String patientID=UUID.randomUUID().toString().replace("-", "");
 		
 		UserModel userModel=MedicalCardService.getUserData(recordCardHead.getOpenID());
 		recordCardHead.setOpenIDCard(userModel.getOpenIDCard());
 		recordCardHead.setOpenTel(userModel.getOpenTel());
 		recordCardHead.setOpenUserName(userModel.getOpenUserName());
 		recordCardHead.setCertType(userModel.getCertType().toString());
+		recordCardHead.setOpenUserID(patientID);
 		
 		String xml=recordCardMode.sendStr(recordCardHead);
 		try {
@@ -85,6 +91,8 @@ public class MedicalCardController {
             
             if(xmlTest.getBody().getRecordCardList() != null){
             	recordCardHead.setHospitalUserID(xmlTest.getBody().getRecordCardList().getHospitalUserID());
+            	recordCardHead.setPatientID(patientID);
+            	
                 MedicalCardService.getRecordCard(recordCardHead);
                 entity.setSuccess(true);
                 entity.setMessage("绑定成功");
@@ -112,13 +120,13 @@ public class MedicalCardController {
 	public Entity cancelCard(String patientID,String hosptFrom){
 		Entity entity=new Entity();
 		CancelMedicalCardHead recordCardHead = new CancelMedicalCardHead();
-		recordCardHead.setOpenUserID("2088022943884345");
+		recordCardHead.setOpenUserID(patientID);
 		String hosptId = MedicalCardService.getHostpId(patientID);
 		recordCardHead.setHospitalUserID(hosptId);
-		if(hosptFrom.equals("金山总部")){
+		if(hosptFrom.equals("金山院区")){
 			recordCardHead.setAccessToken("800EBED9-63E5-4408-A184-BE693DA32CB7");
 		}
-		if(hosptFrom.equals("市区分部")){
+		if(hosptFrom.equals("虹口院区")){
 			recordCardHead.setAccessToken("800EBED9-63E5-4408-A184-BE693DA32CB6");
 		}
 		String xml=recordCardMode.sendStr(recordCardHead);
@@ -188,6 +196,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/insertweachat")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity insertWeachat(@RequestBody UserModel userModel ){
 		Entity entity=new Entity();
 		try {
@@ -216,13 +226,19 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/getweachattopatient")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getWeachatTopatient(@RequestBody UserModel userModel){
 		Entity entity=new Entity();
+		try {
+			List<UserModel> patients = MedicalCardService.getWeachatTopatient(userModel);
+			entity.setResult(patients);
+			entity.setSuccess(true);
+		} catch (Exception e) {
+			entity.setMessage("获取失败");
+			entity.setSuccess(false);
+		}
 		
-		List<UserModel> patients = MedicalCardService.getWeachatTopatient(userModel);
-		
-		entity.setResult(patients);
-		entity.setSuccess(true);
 		return entity;
 		
 	}
@@ -234,6 +250,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/getopenid")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getOpenID(@RequestBody UserModel userModel){
 		Entity entity=new Entity();
 		try {
@@ -264,6 +282,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/checklogin")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity checkLogin(@RequestBody UserModel userModel) {
 		Entity entity=new Entity();
 		try {
@@ -285,6 +305,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/adddoclist")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity addDocList(@RequestBody InModel inModel ) {
 		Entity entity= new Entity();
 		try {
@@ -314,6 +336,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/deletedoclist")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity deleteDocList(@RequestBody InModel inModel ) {
 		Entity entity= new Entity();
 		try {
@@ -336,6 +360,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/getdoclist")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getDocList(@RequestBody InModel inModel ) {
 		Entity entity= new Entity();
 		try {
@@ -357,6 +383,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/checkDoc")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity checkDoc(@RequestBody InModel inModel  ) {
 		Entity entity= new Entity();
 		try {
@@ -366,7 +394,6 @@ public class MedicalCardController {
 			 }else{
 				 entity.setSuccess(false);
 			 }
-			 
 		} catch (Exception e) {
 			entity.setSuccess(false);
 			entity.setMessage(e.toString());
@@ -381,17 +408,19 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/selectintroduce")
 	@GetMapping
+	@Encrypt
+	@Decrypt
 	public Entity selectIntroduce() {
 		Entity entity= new Entity();
-		
-			List<String> introduce = new ArrayList<String>();
-			introduce.add(localhost+"introduce1.png");
-			introduce.add(localhost+"introduce2.png");
-			introduce.add(localhost+"introduce3.png");
-			introduce.add(localhost+"introduce4.png");
-			introduce.add(localhost+"introduce5.png");
+		try {
+			List<String> introduce = MedicalCardService.selectIntroduce();
+			
 			entity.setResult(introduce);
 			entity.setSuccess(true);
+		} catch (Exception e) {
+			entity.setSuccess(false);
+		}
+			
 		return entity;
 	}
 	
@@ -402,6 +431,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/deletepatient")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity deletePatient(@RequestBody InModel inModel){
 		Entity entity=new Entity();
 		try {
@@ -412,8 +443,6 @@ public class MedicalCardController {
 			}else{
 				entity.setSuccess(false);
 			}
-			
-			
 		} catch (Exception e) {
 			entity.setMessage(e.toString());
 			entity.setSuccess(false);
@@ -430,6 +459,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/checkweachat")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity checkWeachat(@RequestBody UserModel userModel ){
 		Entity entity=new Entity();
 		try {
@@ -437,7 +468,6 @@ public class MedicalCardController {
 			if(check > 0){
 				entity.setSuccess(true);
 			}
-			
 		} catch (Exception e) {
 			entity.setSuccess(false);
 			entity.setMessage(e.toString());
@@ -454,6 +484,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/getweachat")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity getWeachat(@RequestBody UserModel userModel ){
 		Entity entity=new Entity();
 		try {
@@ -476,6 +508,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/updateweachat")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity updateWeachat(@RequestBody UserModel userModel ){
 		Entity entity=new Entity();
 		try {
@@ -491,19 +525,40 @@ public class MedicalCardController {
 	}
 	
 	/**
-	 * 查询生效的轮播图内容
+	 *  查询生效的各类图内容
 	 * 
 	 * @return
 	 */
 	@RequestMapping("/selectphototext")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity selectPhotoText(@RequestBody Photo photo) {
 		Entity entity= new Entity();
 		try {
 			List<Photo> pootos = MedicalCardService.selectPhotoText(photo);
-			for (Photo photo2 : pootos) {
-				photo2.setPhoto(localhost+photo2.getPhoto());
-			}
+			entity.setResult(pootos);
+			entity.setSuccess(true);
+		} catch (Exception e) {
+			entity.setSuccess(false);
+			entity.setMessage(e.toString());
+		}
+		return entity;
+	}
+	
+	/**
+	 * 查询生效的各类图标题
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/selectphototitle")
+	@PostMapping
+	@Encrypt
+	@Decrypt
+	public Entity selectPhotoTitle(@RequestBody Photo photo) {
+		Entity entity= new Entity();
+		try {
+			List<Photo> pootos = MedicalCardService.selectPhotoTitle(photo);
 			entity.setResult(pootos);
 			entity.setSuccess(true);
 		} catch (Exception e) {
@@ -520,6 +575,8 @@ public class MedicalCardController {
 	 */
 	@RequestMapping("/checkidfrom")
 	@PostMapping
+	@Encrypt
+	@Decrypt
 	public Entity checkIDFrom(@RequestBody GetHospitalMedicalCardListHead recordCardHead ){
 		Entity entity= new Entity();
 		List<String> hostps = new ArrayList<>();
@@ -531,42 +588,52 @@ public class MedicalCardController {
 //		recordCardHead.setOpenIDCard(user.getOpenIDCard());
 //		recordCardHead.setOpenTel(user.getOpenTel());
 //		recordCardHead.setOpenUserName(user.getOpenUserName());
-		
-		recordCardHead.setAccessToken("800EBED9-63E5-4408-A184-BE693DA32CB7");//金山总部token
-		entity = GetHospitalCard(recordCardHead);
-		count = MedicalCardService.checkIsExist(recordCardHead.getCardNo(),"金山总部",recordCardHead.getOpenUserName());
-		
-		if(entity.getMessage() == "" && count == 0){
-			hostps.add("金山总部");
-		}
-		
-		if(count > 0){
-			hostpEx.add("金山总部");
-		}
-		count = 0;
-		recordCardHead.setAccessToken("800EBED9-63E5-4408-A184-BE693DA32CB6");//市区分部token
-		entity = GetHospitalCard(recordCardHead);
-		count = MedicalCardService.checkIsExist(recordCardHead.getCardNo(),"市区分部",recordCardHead.getOpenUserName());
-		
-		if(entity.getMessage() == "" && count == 0){
-			hostps.add("市区分部");
-		}
-		
-		if(count > 0){
-			hostpEx.add("市区分部");
-		}
-		list.add(hostps);//可绑定
-		list.add(hostpEx);//已存在
-		if(hostps.size() > 0){
-			entity.setMessage("可绑院区如下");
-			entity.setSuccess(true);
-		}
-		if(hostpEx.size() ==0 && hostps.size() == 0  ){
-			entity.setMessage("请查看就诊卡信息是否填写正确");
+		try {
+			recordCardHead.setAccessToken("800EBED9-63E5-4408-A184-BE693DA32CB7");//金山总部token
+			entity = GetHospitalCard(recordCardHead);
+			count = MedicalCardService.checkIsExist(recordCardHead.getCardNo(),"金山院区",recordCardHead.getOpenUserName());
+			
+			if(entity.getMessage() == "" && count == 0){
+				hostps.add("金山院区");
+			}
+			
+			if(count > 0){
+				hostpEx.add("金山院区");
+			}
+			count = 0;
+			recordCardHead.setAccessToken("800EBED9-63E5-4408-A184-BE693DA32CB6");//市区分部token
+			entity = GetHospitalCard(recordCardHead);
+			count = MedicalCardService.checkIsExist(recordCardHead.getCardNo(),"虹口院区",recordCardHead.getOpenUserName());
+			
+			if(entity.getMessage() == "" && count == 0){
+				hostps.add("虹口院区");
+			}
+			
+			if(count > 0){
+				hostpEx.add("虹口院区");
+			}
+			list.add(hostps);//可绑定
+			list.add(hostpEx);//已存在
+			if(hostps.size() > 0){
+				entity.setMessage("可绑院区如下");
+				entity.setSuccess(true);
+			}
+			if(hostps.size() == 0){
+				entity.setMessage("暂无可绑医院");
+				entity.setSuccess(false);
+			}
+			if(hostpEx.size() ==0 && hostps.size() == 0  ){
+				entity.setMessage("请查看就诊卡信息是否填写正确");
+				entity.setSuccess(false);
+			}
+			
+			entity.setResult(list);
+
+		} catch (Exception e) {
+			entity.setMessage("系统出错");
 			entity.setSuccess(false);
 		}
-		entity.setResult(list);
-		
+				
 		return entity;
 	}
 	

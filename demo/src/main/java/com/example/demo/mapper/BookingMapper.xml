@@ -4,7 +4,7 @@
 
     <!-- 获取数据库中已有的医生列表数据 -->
 	<select id="getOldDoc" resultType="String" >
-		select docCode from oa_book_resource where hospitalName = #{hostp}
+		select docCode from oa_book_resource where hospitalID = #{hostp}
 	</select>
 
 	<!-- 新增医生数据 -->

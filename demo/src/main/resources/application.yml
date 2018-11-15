@@ -41,6 +41,9 @@ spring:
     static-path-pattern: /**   
   resources:
     static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:${web.upload-path}
+  encrypt: 
+    key: abcdef0123456789
+    debug: false
 web:
   upload-path: C:/Program Files/app/photo/ 
 
@@ -64,13 +67,14 @@ server :
   tomcat:
     max-threads: 500
     uri-encoding: UTF-8
+  ssl:
+    key-store: classpath:tonticn.cn.jks
+    key-store-password: 66i49euxdw7919
+    keyStoreType: JKS
 
 mybatis:
   mapper-locations: classpath:com/example/demo/mapper/*.xml
   
-book: 
-  accessToken: 800EBED9-63E5-4408-A184-BE693DA32CB6
-  openUserID: 1   
 
 configure: 
   appid: wxf046e2622f9fe82a
@@ -80,7 +84,7 @@ configure:
 spring:
   profiles: test
   datasource:
-    url: jdbc:mysql://192.168.2.165/test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+    url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
     username: root
     password: YJjk_2018
 

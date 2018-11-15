@@ -126,7 +126,7 @@
 	
 	<!-- 获取收藏医生数据 -->
 	<select id="getDocData" parameterType="String" resultType="com.example.demo.domain.Booking.DocModel">
-		select hospitalName,docCode,docName,docPhotoPath,deptName2,docDuty,docDesc,jsonMemo from oa_book_resource
+		select hospitalID ,hospitalName,docCode,docName,docPhotoPath,deptName2,docDuty,docDesc,jsonMemo from oa_book_resource
 		where docCode = #{doc}
 	</select>
 	
@@ -186,18 +186,28 @@
 		and patientName = #{name}
 	</select>
 	
-	<!-- 查询轮播图内容 -->
+	<!-- 查询图内容 -->
 	<select id="selectPhotoText" parameterType="com.example.demo.domain.Photo" resultType="com.example.demo.domain.Photo">
-		select id,photo,title,text,createTime from 
+		select id,photo,title,text,updateTime createTime from 
 			oa_photo
 		where 1=1
 			and status =1
-			and top = 1
 			and type = #{photo.type}
 		<if test='photo.id != null and photo.id != ""'>
 			and id = #{photo.id}
 		</if>
-		order by createTime desc
+		order by top desc,updateTime desc
+	</select>
+	
+	<!-- 查询图标题 -->
+	<select id="selectPhotoTitle" parameterType="com.example.demo.domain.Photo" resultType="com.example.demo.domain.Photo">
+		select id,title from 
+			oa_photo
+		where 1=1
+			and status =1
+			and type = #{photo.type}
+		order by top desc,createTime desc
+		limit #{photo.id},#{photo.status}
 	</select>
 	
 </mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.ReportDao">
+	
+	<!-- 更新检验报告列表数据 -->
+	<insert id="addJianyanReportList" parameterType="com.example.demo.domain.Report.GetJianyanReportList.ReportList" >
+		insert into oa_jianyan_report_list (
+			OpenUserId,
+			ReportContent,
+			ReportDateTime,
+			ReportReadStatus,
+			ReportNo,
+			PatientName,
+			ReportType,
+			URL,
+			ReportNo_Short,
+			CreateTime,
+			CreateUser
+		)values(
+			#{report.openUserId},
+			#{report.reportContent},
+			#{report.reportDateTime},
+			#{report.RESULT_STATUS},
+			#{report.reportNo},
+			#{report.patientName},
+			#{report.reportType},
+			#{report.URL},
+			#{report.reportNoShort},
+			#{report.createTime},
+			#{report.createUser}
+		)
+	</insert>
+
+	<!-- 删除旧的检验报告列表数据 -->
+	<delete id="deleteOldReportList" parameterType="String">
+		delete from oa_jianyan_report_list
+			where OpenUserId = #{patientId}
+	</delete>
+	
+	<!-- 获取检验报告列表数据 -->
+	<select id="GetJianyanReport" parameterType="String" resultType="com.example.demo.domain.Report.GetJianyanReportList.ReportList">
+		select * from oa_jianyan_report_list 
+			where 1=1
+			and OpenUserId = #{openUserID}
+			and ReportDateTime >= #{dataSource}
+	</select>
+	
+	<!--  获取当前患者的总报告数 -->
+	<select id="getjianyanReportSumCount" parameterType="String" resultType="Integer">
+		select count(1) from oa_jianyan_report_list 
+			where 1=1
+			and OpenUserId = #{openUserID}
+	</select>
+	
+	<!-- 删除旧的检验报告详细数据 -->
+	<delete id="deleteOldDetail" parameterType="String">
+		delete from oa_jianyan_report_detail_branch
+			where ReportNo = #{reportNo}
+	</delete>
+	
+	<!-- 更新检验报告详细数据 -->
+	<insert id="addDetail" parameterType="com.example.demo.domain.Report.GetJianyanReportDetail.ReportInspectionItemList" >
+		insert into oa_jianyan_report_detail_branch (
+			ReportNo,
+			ItemName,
+			ItemResult,
+			ReferenceValue,
+			ReferenceValueUnit,
+			ReportAlert
+		)values(
+			#{reportDetail.reportNo},
+			#{reportDetail.itemName},
+			#{reportDetail.itemResult},
+			#{reportDetail.referenceValue},
+			#{reportDetail.referenceValueUnit},
+			#{reportDetail.reportAlert}
+		)
+	</insert>
+	
+</mapper>

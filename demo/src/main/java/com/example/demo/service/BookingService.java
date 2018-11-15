@@ -187,16 +187,17 @@ public class BookingService {
 		
 		List<DeptResourceDocNoSourceList> dept = new ArrayList<DeptResourceDocNoSourceList>();
 		
-		bookingDao.deleteDept(deptCode);
-		
-		for (DeptResourceDocNoSourceList deptResource : body.getDeptResourceDocNoSourceList()) {
+		if(body.getDeptResourceDocNoSourceList() !=null){
+			bookingDao.deleteDept(deptCode);
 			
-			deptResource.setDeptCode(deptCode);
-			bookingDao.addDept(deptResource);
-			
+			for (DeptResourceDocNoSourceList deptResource : body.getDeptResourceDocNoSourceList()) {
+				
+				deptResource.setDeptCode(deptCode);
+				bookingDao.addDept(deptResource);
+				
+			}
+			dept=bookingDao.getDept(day,deptCode);
 		}
-		
-		dept=bookingDao.getDept(day,deptCode);
 		
 		return dept;
 	}
@@ -210,15 +211,17 @@ public class BookingService {
 	public List<DocResourceResourceList> getBookingDocResource(String day, BookingDocResourceBody body, String docCode) {
 
 		List<DocResourceResourceList> doc = new ArrayList<>();
-		
-		bookingDao.deleteDoc(docCode);
-		
-		for (DocResourceResourceList docResource : body.getDocResourceResourceList()) {
-			docResource.setDocCode(docCode);
-			bookingDao.addDoc(docResource);
+		if(body.getDocResourceResourceList() != null){
+			bookingDao.deleteDoc(docCode);
+			
+			for (DocResourceResourceList docResource : body.getDocResourceResourceList()) {
+				docResource.setDocCode(docCode);
+				bookingDao.addDoc(docResource);
+			}
+			
+			doc = bookingDao.getDoc(day,docCode);
 		}
 		
-		doc = bookingDao.getDoc(day,docCode);
 		
 		return doc;
 	}
