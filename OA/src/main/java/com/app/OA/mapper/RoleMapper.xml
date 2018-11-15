@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.app.OA.dao.RoleDao">
+
+	<!--新增角色-->
+	<insert id="add" parameterType="com.app.OA.domain.Role">
+		insert into oa_role (
+			roleName,
+			createUser,
+			createTime,
+			powerGrade,
+			explains
+		) values(
+			#{role.roleName},
+			#{role.createUser},
+			#{role.createTime},
+			#{role.powerGrade},
+			#{role.explains}
+		)
+	</insert>
+	
+	<!--删除角色-->
+	<delete id="delete" parameterType="Integer">
+		delete from oa_role where  id = #{id}
+	</delete>
+
+	<!--修改角色-->
+	<update id="update" parameterType="com.app.OA.domain.Role">
+		update  oa_role set
+			roleName = #{role.roleName},
+			updateTime = #{role.updateTime},
+			updateUser = #{role.updateUser},
+			powerGrade = #{role.powerGrade},
+			explains = #{role.explains}
+		where 
+			id= #{role.id}
+	</update>
+
+	<!-- 查询所有角色 -->
+	<select id="selectAll" resultType="com.app.OA.domain.Role">
+		select * from oa_role
+	</select>
+	
+	<!-- 获取权限名称 -->
+	<select id="getRoleName" parameterType="Integer" resultType="String">
+		select powerName from oa_power where id = #{id}
+	</select>
+	
+	<!-- 获取角色名称 -->
+	<select id="getName" resultType="com.app.OA.domain.Role">
+		select roleName,id from oa_role where powerGrade not LIKE "1,%" and  powerGrade  != '1'
+	</select>
+	
+	<!--修改被删除角色的用户为普通权限-->
+	<update id="updateUser" parameterType="Integer">
+		update  oa_account set
+			roleGrade = 3
+		where 
+			roleGrade = #{id}
+	</update>
+	
+	<!-- 验证角色名是否存在 -->
+	<select id="checkName" parameterType="com.app.OA.domain.Role" resultType="Integer" >
+		select count(1) from oa_role where 1=1
+		and roleName = #{role.roleName} 
+		and id != #{role.id} 
+	</select>
+	
+</mapper>
